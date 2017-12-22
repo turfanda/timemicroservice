@@ -20,6 +20,7 @@ Strict mode is declared by adding "use strict"; to the beginning of a script or 
 
 var express = require('express');
 var moment = require('moment');
+var agent = require('express-useragent');
 var app = express();
 
 
@@ -70,8 +71,27 @@ app.get('/:input',function(req,res){
     res.send({"unix":moment(input,"X").unix(),"natural":moment(input,"X").format('MMMM DD, YYYY')});
     }
   }
-  console.log("ok");
 });
+
+app.use(agent.express());
+
+app.get('/api/whoami',function(req,res){
+  
+  let asd = req.useragent.source;
+  let start = asd.indexOf('(') + 1;
+  let end = asd.indexOf(')');
+  
+const out = {
+    ipaddress: req.headers['x-forwarded-for'].split(",")[0],
+    language: req.headers['accept-language'].split(',')[0],
+    software: asd.slice(start, end)
+  };
+ res.send(out);
+
+});
+
+
+
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
